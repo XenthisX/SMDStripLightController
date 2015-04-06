@@ -1,3 +1,8 @@
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.GlobalScreen;
+
 import controlP5.*;
 import processing.serial.*;
 import java.awt.Color;
@@ -130,6 +135,15 @@ void setup() {
   Toggle spectrum = controlP5.addToggle("Spectrum", false, toggleX*2 + toggleXoffset, toggleY, toggleW, toggleH);
 }
 void draw() {
+  try {
+    GlobalScreen.registerNativeHook();
+
+  }
+  catch (NativeHookException ex) {
+    System.err.println("There was a problem registering the native hook.");
+    System.err.println(ex.getMessage());
+  }
+
   HSBcolor = color(hueNumClean, saturationNum, brightnessNum);
 
   background(HSBcolor);
@@ -242,6 +256,11 @@ void controlEvent(ControlEvent theEvent) {
   hueC = Color.HSBtoRGB((float)hueNumClean/1020, 1, 1);
   controlP5.getController("Hue").setColorActive(color(hueC));
 }
+
+void nativeKeyReleased(NativeKeyEvent theEvent) {
+  println("Key Pressed" + NativeKeyEvent.getKeyText(theEvent.getKeyCode()));
+}
+
 void stop()
 {
   // always close Minim audio classes when you finish with them
