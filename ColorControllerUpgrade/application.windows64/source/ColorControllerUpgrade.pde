@@ -189,7 +189,7 @@ void draw() {
       breatheString = "0";
       brightnessNum = (int)controlP5.getValue("Brightness");
     }
-    sendStringOne = hueString + saturationString + brightnessString + breatheString  + "\n";
+    sendStringOne = hueString + saturationString + brightnessString + breatheString + "0" + "\n";
     myPort.write(sendStringOne);
     System.out.print(sendStringOne);
     delay(25); //THIS IS THE DELAY, I'M NOT SURE IF I SHOULD REMOVE IT????
