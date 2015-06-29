@@ -97,7 +97,7 @@ void setup() {
   fft = new FFT(in.bufferSize(), in.sampleRate());
   //End Minim Setup #########
 
-  myPort = new Serial(this, "COM6", 19200);
+  myPort = new Serial(this, "COM3", 19200);
   controlP5 = new ControlP5(this);
 
 
