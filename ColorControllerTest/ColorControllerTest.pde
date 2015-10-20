@@ -102,7 +102,7 @@ void setup() {
   fft = new FFT(in.bufferSize(), in.sampleRate());
   //End Minim Setup #########
 
-  myPort = new Serial(this, "COM6", 19200);
+  myPort = new Serial(this, "COM3", 19200);
   controlP5 = new ControlP5(this);
 
 
@@ -162,7 +162,7 @@ void draw() {
   hueNum = Math.round((hueNumClean / 1.1));
   saturationNum = (int)controlP5.getValue("Saturation");
   brightnessNum = (int)controlP5.getValue("Brightness");
-  breatheNum = Math.round(controlP5.getController("Breathing").value());
+  breatheNum = Math.round(controlP5.getController("Breathing").getValue());
   hueString = String.format("%03d", hueNum);
   saturationString = String.format("%03d", saturationNum);
   brightnessString = String.format("%03d", brightnessNum);
@@ -173,20 +173,20 @@ void draw() {
   midTemp = (fft.calcAvg((float) 600, (float) 1500)) * 17;
   trebleTemp = (fft.calcAvg((float) 2400, (float) 5600)) * 65;
 
-  if (controlP5.getController("Spectrum").value() == 0) {
+  if (controlP5.getController("Spectrum").getValue()  == 0) {
     //changes color mode to HSB, used when lights aren't controlled by sound
     // in order to aid in ease of use and make program more intuitive
     colorMode(HSB, 1030, 255, 255); 
 
 
-    if (controlP5.getController("Cycle Color").value() == 1) {
+    if (controlP5.getController("Cycle Color").getValue()  == 1) {
       controlP5.getController("Speed").show();
       if (hueing > 1019 || hueing < 1) {
         cycleSpeed = -cycleSpeed;
       }
       hueing = hueing + cycleSpeed;
       controlP5.getController("Hue").setValue(hueing);
-    } else if (controlP5.getController("Cycle Color").value() == 0) {
+    } else if (controlP5.getController("Cycle Color").getValue()  == 0) {
       cycleNum = 0;
       controlP5.getController("Speed").hide();
       controlP5.getController("Speed").setValue(0.00);
@@ -250,9 +250,9 @@ void draw() {
 }
 void controlEvent(ControlEvent theEvent) {
 
-  if (theEvent.controller().name() =="Speed") {
-    cycleSpeed = (int)controlP5.getValue("Speed");
-  }
+  
+  cycleSpeed = (int)controlP5.getValue("Speed");
+  
   hueC = Color.HSBtoRGB((float)hueNumClean/1020, 1, 1);
   controlP5.getController("Hue").setColorActive(color(hueC));
 }
@@ -274,4 +274,3 @@ float constrainer(float input) {
   constrain(input, 0, 255);
   return input;
 }
-
