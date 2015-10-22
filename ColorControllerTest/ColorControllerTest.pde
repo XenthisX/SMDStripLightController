@@ -1,7 +1,11 @@
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
+import org.jnativehook.mouse.NativeMouseEvent;
+import org.jnativehook.mouse.NativeMouseInputListener;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.GlobalScreen;
+import org.jnativehook.*;
+import java.util.EventListener;
 
 import controlP5.*;
 import processing.serial.*;
@@ -50,14 +54,7 @@ int toggleY = 200;
 int toggleW = 50;
 int toggleH = 50;
 int knobSize;
-int smallStart = 0;
-int smallEnd = 9;
-int smallWidth = 100;
-int smallHeight = 20;
-int smallStartVal = 0;
 int smallOffset = 30;
-int smallX = 400;
-int smallY = toggleY;
 
 int hueNum = 0;
 float hueNumClean = 0;
@@ -86,6 +83,10 @@ int fading = 10;
 int hueing = 10;
 int fadeSpeed = 1;
 int cycleSpeed = 0;
+int bright = 255;
+Textlabel textLabel;
+boolean keyPress = false;
+boolean mousePress = false;
 
 void setup() {
 
@@ -122,7 +123,7 @@ void setup() {
   brightness.setHandleSize(sliderHeight + 5);
 
   //add Cycle Speed Slider
-  controlP5.addSlider("Speed", smallStart, smallEnd, smallStartVal, smallX, smallY, smallWidth, smallHeight).showTickMarks(true).snapToTickMarks(true).setNumberOfTickMarks(10);
+  controlP5.addSlider("Speed", 0, 9, 1, toggleX - (toggleW / 2), toggleY - (toggleX/3), 100, 20).showTickMarks(true).snapToTickMarks(true).setNumberOfTickMarks(10).setCaptionLabel("");
   controlP5.getController("Speed").hide();
 
   //add Cycle Color Toggle
@@ -133,16 +134,23 @@ void setup() {
 
   //add Spectrum Toggle
   Toggle spectrum = controlP5.addToggle("Spectrum", false, toggleX*2 + toggleXoffset, toggleY, toggleW, toggleH);
+
+  //add Mouse / KeyBoard Response Half Toggles
+  Toggle mouseResponse = controlP5.addToggle("Mouse", false, toggleX * 3 + toggleXoffset, toggleY, toggleW, toggleH/2).setCaptionLabel("");
+  Toggle keyboardResponse = controlP5.addToggle("Keyboard", false, toggleX * 3 + toggleXoffset, toggleY + toggleH/2, toggleW, toggleH/2).setCaptionLabel("Top: M, Bottom: KB");
 }
 void draw() {
   try {
     GlobalScreen.registerNativeHook();
-
   }
   catch (NativeHookException ex) {
     System.err.println("There was a problem registering the native hook.");
     System.err.println(ex.getMessage());
   }
+
+  GlobalScreen.addNativeKeyListener(new GlobalKeyListenerExample());
+  GlobalMouseListenerExample example = new GlobalMouseListenerExample();
+  GlobalScreen.addNativeMouseListener(example);
 
   HSBcolor = color(hueNumClean, saturationNum, brightnessNum);
 
@@ -153,6 +161,7 @@ void draw() {
   rect(90, 100, 70, 170, 2);
   rect(190, 100, 70, 170, 2);
   rect(290, 100, 70, 170, 2);
+  rect(390, 100, 70, 170, 2);
   fill(150);
   rect(sliderX - 10, sliderY - 10, sliderWidth + 20, 20 + (sliderHeight * 3), 4);
 
@@ -172,12 +181,35 @@ void draw() {
   bassTemp = (fft.calcAvg((float) 10, (float) 299)*10);
   midTemp = (fft.calcAvg((float) 600, (float) 1500)) * 17;
   trebleTemp = (fft.calcAvg((float) 2400, (float) 5600)) * 65;
+  
+
 
   if (controlP5.getController("Spectrum").getValue()  == 0) {
     //changes color mode to HSB, used when lights aren't controlled by sound
     // in order to aid in ease of use and make program more intuitive
     colorMode(HSB, 1030, 255, 255); 
 
+    if (controlP5.getController("Mouse").getValue() == 1) {
+      if (mousePress == true) {
+        bright = 255;
+        controlP5.getController("Brightness").setValue(bright);
+        bright -= 10;
+        mousePress = false;
+      }
+      bright -=10;
+      controlP5.getController("Brightness").setValue(bright);
+    }
+
+    if (controlP5.getController("Keyboard").getValue() == 1) {
+      if (keyPress == true) {
+        bright = 255;
+        controlP5.getController("Brightness").setValue(bright);
+        bright -= 10;
+        keyPress = false;
+      }
+      bright -= 10;
+      controlP5.getController("Brightness").setValue(bright);
+    }
 
     if (controlP5.getController("Cycle Color").getValue()  == 1) {
       controlP5.getController("Speed").show();
@@ -205,7 +237,6 @@ void draw() {
     }
     sendStringOne = hueString + saturationString + brightnessString + breatheString  + "\n";
     myPort.write(sendStringOne);
-    System.out.print(sendStringOne);
     delay(25); //THIS IS THE DELAY, I'M NOT SURE IF I SHOULD REMOVE IT????
   } else {
     colorMode(RGB, 255, 255, 255);
@@ -231,7 +262,7 @@ void draw() {
 
 
     myPort.write(sendStringTwo);
-    System.out.print(sendStringTwo);
+
 
     if (bassTemp < bass && bassTemp < 190 ) { 
       bassSend = bassSend - 30;
@@ -250,15 +281,9 @@ void draw() {
 }
 void controlEvent(ControlEvent theEvent) {
 
-  
   cycleSpeed = (int)controlP5.getValue("Speed");
-  
   hueC = Color.HSBtoRGB((float)hueNumClean/1020, 1, 1);
   controlP5.getController("Hue").setColorActive(color(hueC));
-}
-
-void nativeKeyReleased(NativeKeyEvent theEvent) {
-  println("Key Pressed" + NativeKeyEvent.getKeyText(theEvent.getKeyCode()));
 }
 
 void stop()
@@ -273,4 +298,43 @@ void stop()
 float constrainer(float input) {
   constrain(input, 0, 255);
   return input;
+}
+
+public class GlobalKeyListenerExample implements NativeKeyListener {
+  public void nativeKeyPressed(NativeKeyEvent e) {
+    //System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
+    keyPress = true;
+  }
+
+  public void nativeKeyReleased(NativeKeyEvent e) {
+    //System.out.println("Key Released: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
+  }
+
+  public void nativeKeyTyped(NativeKeyEvent e) {
+    //System.out.println("Key Typed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
+  }
+}
+
+public class GlobalMouseListenerExample implements NativeMouseInputListener {
+  public void nativeMouseClicked(NativeMouseEvent e) {
+    //System.out.println("Mosue Clicked: " + e.getClickCount());
+    mousePress = true;
+  }
+
+  public void nativeMousePressed(NativeMouseEvent e) {
+    //System.out.println("Mosue Pressed: " + e.getButton());
+    keyPress = true;
+  }
+
+  public void nativeMouseReleased(NativeMouseEvent e) {
+    //System.out.println("Mosue Released: " + e.getButton());
+  }
+
+  public void nativeMouseMoved(NativeMouseEvent e) {
+    //System.out.println("Mosue Moved: " + e.getX() + ", " + e.getY());
+  }
+
+  public void nativeMouseDragged(NativeMouseEvent e) {
+    //System.out.println("Mosue Dragged: " + e.getX() + ", " + e.getY());
+  }
 }

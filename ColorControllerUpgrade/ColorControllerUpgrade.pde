@@ -246,14 +246,13 @@ void draw() {
     background(HSBcolor);
   }
 } 
-/* void controlEvent(ControlEvent theEvent) {
+void controlEvent(ControlEvent theEvent) {
 
-  if (theEvent.controller().name() =="Speed") {
-    cycleSpeed = (int)controlP5.getValue("Speed");
-  }
+  
+  cycleSpeed = (int)controlP5.getValue("Speed");
   hueC = Color.HSBtoRGB((float)hueNumClean/1020, 1, 1);
   controlP5.getController("Hue").setColorActive(color(hueC));
-} */
+}
 void stop()
 {
   // always close Minim audio classes when you finish with them
