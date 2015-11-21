@@ -6,7 +6,7 @@ import org.jnativehook.NativeHookException;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.*;
 import java.util.EventListener;
-
+// in order to get jnativehook working, you must import through add file... add the jnativehook jar to Processing
 import controlP5.*;
 import processing.serial.*;
 import java.awt.Color;
@@ -139,11 +139,9 @@ void setup() {
   Toggle mouseResponse = controlP5.addToggle("Mouse", false, toggleX * 3 + toggleXoffset, toggleY, toggleW, toggleH/2).setCaptionLabel("");
   Toggle keyboardResponse = controlP5.addToggle("Keyboard", false, toggleX * 3 + toggleXoffset, toggleY + toggleH/2, toggleW, toggleH/2).setCaptionLabel("Top: M, Bottom: KB");
 }
+
+
 void draw() {
-
-
-
-
 
   HSBcolor = color(hueNumClean, saturationNum, brightnessNum);
 
@@ -181,6 +179,16 @@ void draw() {
     //changes color mode to HSB, used when lights aren't controlled by sound
     // in order to aid in ease of use and make program more intuitive
     colorMode(HSB, 1030, 255, 255); 
+
+    if (controlP5.getController("Mouse").getValue() == 0 && controlP5.getController("Keyboard").getValue() == 0) {
+      try {
+        GlobalScreen.unregisterNativeHook();
+      }
+      catch (NativeHookException ex) {
+        System.err.println("There was a problem unregistering the native hook.");
+        System.err.println(ex.getMessage());
+      }
+    }
 
     if (controlP5.getController("Mouse").getValue() == 1) {
       try {
