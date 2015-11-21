@@ -140,17 +140,10 @@ void setup() {
   Toggle keyboardResponse = controlP5.addToggle("Keyboard", false, toggleX * 3 + toggleXoffset, toggleY + toggleH/2, toggleW, toggleH/2).setCaptionLabel("Top: M, Bottom: KB");
 }
 void draw() {
-  try {
-    GlobalScreen.registerNativeHook();
-  }
-  catch (NativeHookException ex) {
-    System.err.println("There was a problem registering the native hook.");
-    System.err.println(ex.getMessage());
-  }
 
-  GlobalScreen.addNativeKeyListener(new GlobalKeyListenerExample());
-  GlobalMouseListenerExample example = new GlobalMouseListenerExample();
-  GlobalScreen.addNativeMouseListener(example);
+
+
+
 
   HSBcolor = color(hueNumClean, saturationNum, brightnessNum);
 
@@ -181,7 +174,7 @@ void draw() {
   bassTemp = (fft.calcAvg((float) 10, (float) 299)*10);
   midTemp = (fft.calcAvg((float) 600, (float) 1500)) * 17;
   trebleTemp = (fft.calcAvg((float) 2400, (float) 5600)) * 65;
-  
+
 
 
   if (controlP5.getController("Spectrum").getValue()  == 0) {
@@ -190,6 +183,15 @@ void draw() {
     colorMode(HSB, 1030, 255, 255); 
 
     if (controlP5.getController("Mouse").getValue() == 1) {
+      try {
+        GlobalScreen.registerNativeHook();
+      }
+      catch (NativeHookException ex) {
+        System.err.println("There was a problem registering the native hook.");
+        System.err.println(ex.getMessage());
+      }
+      GlobalMouseListenerExample example = new GlobalMouseListenerExample();
+      GlobalScreen.addNativeMouseListener(example);
       if (mousePress == true) {
         bright = 255;
         controlP5.getController("Brightness").setValue(bright);
@@ -201,6 +203,14 @@ void draw() {
     }
 
     if (controlP5.getController("Keyboard").getValue() == 1) {
+      try {
+        GlobalScreen.registerNativeHook();
+      }
+      catch (NativeHookException ex) {
+        System.err.println("There was a problem registering the native hook.");
+        System.err.println(ex.getMessage());
+      }
+      GlobalScreen.addNativeKeyListener(new GlobalKeyListenerExample());
       if (keyPress == true) {
         bright = 255;
         controlP5.getController("Brightness").setValue(bright);
@@ -323,7 +333,7 @@ public class GlobalMouseListenerExample implements NativeMouseInputListener {
 
   public void nativeMousePressed(NativeMouseEvent e) {
     //System.out.println("Mosue Pressed: " + e.getButton());
-    keyPress = true;
+    mousePress = true;
   }
 
   public void nativeMouseReleased(NativeMouseEvent e) {
